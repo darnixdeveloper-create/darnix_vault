@@ -31,43 +31,95 @@
         }
     </script>
     <style>
+        :root {
+            --primary: #00A3FF;
+            --primary-glow: rgba(0, 163, 255, 0.4);
+            --bg: #020617;
+            --card-bg: rgba(15, 23, 42, 0.6);
+            --border: rgba(255, 255, 255, 0.08);
+        }
         body {
-            background-color: #020817;
+            background-color: var(--bg);
             color: #f8fafc;
             font-family: 'Epilogue', sans-serif;
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(0, 163, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(0, 163, 255, 0.05) 0%, transparent 50%);
         }
+        .aurora {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            filter: blur(120px);
+            border-radius: 50%;
+            z-index: -1;
+            opacity: 0.15;
+            pointer-events: none;
+        }
+        .aurora-1 { top: -200px; left: -200px; background: #00A3FF; }
+        .aurora-2 { bottom: -200px; right: -200px; background: #00A3FF; }
+
         .glow-accent {
-            box-shadow: 0 0 20px -5px #00A3FF;
+            box-shadow: 0 0 25px -5px var(--primary-glow);
         }
-        .glow-hover:hover {
-            box-shadow: 0 0 30px -5px #00A3FF;
+        .glow-text {
+            text-shadow: 0 0 15px var(--primary-glow);
         }
         .glass {
-            background: rgba(2, 8, 23, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
         }
-        ::-webkit-scrollbar {
-            width: 6px;
+        .glass-hover:hover {
+            background: rgba(30, 41, 59, 0.7);
+            border-color: rgba(0, 163, 255, 0.3);
+            transform: translateY(-4px);
         }
-        ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.02);
+        .bento-card {
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.8), rgba(2, 6, 23, 0.9));
+            border: 1px solid var(--border);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
+        .bento-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px -10px var(--primary-glow);
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.2);
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
         .modal-backdrop {
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(4px);
+            background: rgba(2, 6, 23, 0.85);
+            backdrop-filter: blur(8px);
+        }
+        
+        input, select, textarea {
+            background: rgba(255, 255, 255, 0.03) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            transition: all 0.3s ease !important;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary) !important;
+            background: rgba(255, 255, 255, 0.06) !important;
+            box-shadow: 0 0 15px -5px var(--primary-glow) !important;
         }
     </style>
 </head>
 <body class="overflow-hidden">
+    <div class="aurora aurora-1"></div>
+    <div class="aurora aurora-2"></div>
 
     <!-- Auth Screen -->
     <div id="auth-screen" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#020817] p-4">
@@ -99,19 +151,19 @@
     <div id="app-ui" class="hidden flex h-screen w-full overflow-hidden">
         
         <!-- Sidebar -->
-        <aside class="w-[280px] flex flex-col border-r border-white/5 bg-card/50 backdrop-blur-xl">
-            <div class="flex items-center gap-3 p-6">
-                <button id="profile-btn" class="flex h-12 w-12 items-center justify-center rounded-full bg-black border-2 border-[#00A3FF] glow-accent relative overflow-hidden group transition-transform hover:scale-105">
+        <aside class="w-[280px] flex flex-col border-r border-white/5 bg-card/50 backdrop-blur-3xl relative z-20">
+            <div class="flex items-center gap-4 p-8">
+                <button id="profile-btn" class="flex h-14 w-14 items-center justify-center rounded-full bg-black border-2 border-primary glow-accent relative overflow-hidden group transition-all duration-500 hover:scale-110 active:scale-95">
                     <div id="profile-pic-container" class="h-full w-full flex items-center justify-center">
-                        <i data-lucide="database" class="h-6 w-6 text-[#00A3FF]"></i>
+                        <i data-lucide="database" class="h-7 w-7 text-primary"></i>
                     </div>
-                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                        <i data-lucide="edit-3" class="w-4 h-4 text-white"></i>
+                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300">
+                        <i data-lucide="camera" class="w-5 h-5 text-white"></i>
                     </div>
                 </button>
                 <div class="flex flex-col">
-                    <h1 class="text-xl font-black tracking-tighter text-white leading-none font-syne">DAR<span class="text-[#00A3FF]">NIX</span></h1>
-                    <span class="text-[10px] font-bold tracking-[0.3em] text-slate-500 uppercase mt-1">Group</span>
+                    <h1 class="text-2xl font-black tracking-tighter text-white leading-none font-syne glow-text">DAR<span class="text-primary">NIX</span></h1>
+                    <span class="text-[10px] font-bold tracking-[0.4em] text-slate-500 uppercase mt-1.5 opacity-70">Group</span>
                 </div>
             </div>
 
@@ -158,33 +210,36 @@
         <!-- Main Content -->
         <main class="flex-1 flex flex-col overflow-hidden relative">
             <!-- Topbar -->
-            <header class="flex h-20 items-center justify-between border-b border-white/5 bg-card/30 px-8 backdrop-blur-md">
-                <div class="flex items-center gap-4 flex-1 max-w-xl">
+            <header class="flex h-24 items-center justify-between border-b border-white/5 bg-card/20 px-10 backdrop-blur-xl z-10">
+                <div class="flex items-center gap-6 flex-1 max-w-2xl">
                     <div class="relative w-full group">
-                        <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-[#00A3FF] transition-colors"></i>
+                        <i data-lucide="search" class="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-primary transition-all duration-300"></i>
                         <input 
                             type="text" 
                             id="search-input"
-                            placeholder="Tafuta kwenye vault..." 
-                            class="w-full bg-white/5 border border-white/10 h-12 pl-12 pr-4 rounded-xl text-sm focus:outline-none focus:border-[#00A3FF] transition-all"
+                            placeholder="Tafuta chochote kwenye vault yako..." 
+                            class="w-full bg-white/[0.03] border border-white/10 h-14 pl-14 pr-6 rounded-2xl text-sm focus:outline-none focus:border-primary transition-all duration-300 placeholder:text-slate-600"
                         >
                     </div>
                 </div>
 
-                <div class="flex items-center gap-4">
-                    <div class="flex bg-white/5 p-1 rounded-xl border border-white/10">
-                        <button id="view-grid" class="p-2 rounded-lg bg-[#00A3FF] text-white transition-all">
-                            <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                <div class="flex items-center gap-6">
+                    <div class="flex bg-white/[0.03] p-1.5 rounded-2xl border border-white/10">
+                        <button id="view-grid" class="p-2.5 rounded-xl bg-primary text-white glow-accent transition-all duration-300">
+                            <i data-lucide="layout-grid" class="w-4.5 h-4.5"></i>
                         </button>
-                        <button id="view-list" class="p-2 rounded-lg text-slate-400 hover:text-white transition-all">
-                            <i data-lucide="list" class="w-4 h-4"></i>
+                        <button id="view-list" class="p-2.5 rounded-xl text-slate-500 hover:text-white transition-all duration-300">
+                            <i data-lucide="list" class="w-4.5 h-4.5"></i>
                         </button>
                     </div>
-                    <select id="sort-select" class="bg-white/5 border border-white/10 h-11 px-4 rounded-xl text-xs font-bold focus:outline-none focus:border-[#00A3FF] appearance-none cursor-pointer">
-                        <option value="newest">Mpya zaidi</option>
-                        <option value="oldest">Zamani zaidi</option>
-                        <option value="name">Kwa Jina</option>
-                    </select>
+                    <div class="relative group">
+                        <select id="sort-select" class="bg-white/[0.03] border border-white/10 h-14 px-6 pr-10 rounded-2xl text-xs font-bold focus:outline-none focus:border-primary appearance-none cursor-pointer transition-all duration-300">
+                            <option value="newest">Mpya zaidi</option>
+                            <option value="oldest">Zamani zaidi</option>
+                            <option value="name">Kwa Jina</option>
+                        </select>
+                        <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none group-focus-within:text-primary transition-colors"></i>
+                    </div>
                 </div>
             </header>
 
@@ -456,12 +511,10 @@
                 { label: 'Files', count: stats.files, color: '#F59E0B', type: 'File' },
                 { label: 'Projects', count: stats.projects, color: '#8B5CF6', type: 'Project' },
                 { label: 'Notes', count: stats.notes, color: '#EC4899', type: 'Note' },
-            ];
-
-            statsContainer.innerHTML = statConfigs.map(s => `
-                <button onclick="setType('${s.type}')" class="flex flex-col p-4 rounded-2xl border ${selectedType === s.type ? 'border-white/20 bg-white/10' : 'border-white/5 bg-white/5'} hover:bg-white/10 transition-all text-left group">
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500 group-hover:text-slate-300 transition-colors">${s.label}</span>
-                    <span class="text-2xl font-black mt-1" style="color: ${s.color}">${s.count}</span>
+            ];            statsContainer.innerHTML = statConfigs.map(s => `
+                <button onclick="setType('${s.type}')" class="flex flex-col p-5 rounded-2xl bento-card ${selectedType === s.type ? 'border-primary bg-primary/10' : ''} group">
+                    <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 group-hover:text-primary transition-colors">${s.label}</span>
+                    <span class="text-3xl font-black mt-2 glow-text" style="color: ${s.color}">${s.count}</span>
                 </button>
             `).join('');
 
@@ -476,7 +529,7 @@
             ];
 
             navItems.innerHTML = navConfigs.map(n => `
-                <button onclick="setType('${n.type}')" class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all ${selectedType === n.type ? 'bg-[#00A3FF] text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white'}">
+                <button onclick="setType('${n.type}')" class="w-full flex items-center justify-between px-4 py-3.5 rounded-xl transition-all duration-300 ${selectedType === n.type ? 'bg-primary text-white glow-accent' : 'text-slate-400 hover:bg-white/5 hover:text-white'}">
                     <div class="flex items-center gap-3">
                         <i data-lucide="${n.icon}" class="w-4 h-4"></i>
                         <span class="text-sm font-bold">${n.label}</span>
@@ -495,10 +548,10 @@
                 
                 if (viewMode === 'grid') {
                     itemsContainer.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6";
-                    itemsContainer.innerHTML = filtered.map(item => renderGridCard(item)).join('');
+                    itemsContainer.innerHTML = filtered.map((item, idx) => renderGridCard(item, idx)).join('');
                 } else {
                     itemsContainer.className = "flex flex-col gap-3";
-                    itemsContainer.innerHTML = filtered.map(item => renderListCard(item)).join('');
+                    itemsContainer.innerHTML = filtered.map((item, idx) => renderListCard(item, idx)).join('');
                 }
             }
 
@@ -506,67 +559,70 @@
             lucide.createIcons();
         }
 
-        function renderGridCard(item) {
+        function renderGridCard(item, idx) {
             const iconMap = { Website: 'globe', Link: 'link', File: 'file-text', Project: 'hammer', Note: 'sticky-note' };
             const colorMap = { Website: '#3B82F6', Link: '#10B981', File: '#F59E0B', Project: '#8B5CF6', Note: '#EC4899' };
             
             return `
-                <div class="group relative flex flex-col p-6 rounded-3xl border border-white/5 bg-card/40 backdrop-blur-xl hover:border-[#00A3FF]/30 transition-all duration-300 hover:-translate-y-1">
-                    <div class="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onclick="editItem('${item.id}')" class="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all">
-                            <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
+                <div class="group relative flex flex-col p-6 rounded-[2rem] glass glass-hover transition-all duration-500 animate-fade-in" style="animation-delay: ${idx * 0.05}s">
+                    <div class="absolute top-6 right-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                        <button onclick="editItem('${item.id}')" class="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all border border-white/5">
+                            <i data-lucide="edit-2" class="w-4 h-4"></i>
                         </button>
-                        <button onclick="deleteItem('${item.id}')" class="p-2 rounded-lg bg-white/5 hover:bg-red-500/20 text-slate-400 hover:text-red-500 transition-all">
-                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        <button onclick="deleteItem('${item.id}')" class="p-2.5 rounded-xl bg-white/5 hover:bg-red-500/20 text-slate-400 hover:text-red-500 transition-all border border-white/5">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                     </div>
 
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5" style="color: ${colorMap[item.type]}">
-                            <i data-lucide="${iconMap[item.type]}" class="w-5 h-5"></i>
+                    <div class="flex items-center gap-4 mb-5">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 border border-white/5 group-hover:border-primary/30 transition-colors" style="color: ${colorMap[item.type]}">
+                            <i data-lucide="${iconMap[item.type]}" class="w-6 h-6"></i>
                         </div>
+                        <div class="flex flex-col min-w-0">
+                            <h3 class="font-bold text-white leading-tight truncate group-hover:text-primary transition-colors">${item.name}</h3>
+                            <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">${item.type}</span>
+                        </div>
+                    </div>
+
+                    <p class="text-xs text-slate-400 line-clamp-2 mb-5 leading-relaxed">${item.description || 'Hakuna maelezo ya ziada kwa kipengele hiki...'}</p>
+
+                    <div class="flex flex-wrap gap-2 mb-8">
+                        ${item.tags.map(t => `<span class="text-[9px] font-bold px-2.5 py-1 rounded-lg bg-white/5 text-slate-400 border border-white/5 hover:border-primary/20 hover:text-primary transition-all cursor-default">#${t}</span>`).join('')}
+                    </div>
+
+                    <div class="flex items-center justify-between mt-auto pt-5 border-t border-white/5">
                         <div class="flex flex-col">
-                            <h3 class="font-bold text-white leading-tight line-clamp-1">${item.name}</h3>
-                            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500">${item.type}</span>
+                            <span class="text-[9px] uppercase tracking-widest text-slate-600 font-bold">Iliundwa</span>
+                            <span class="text-[10px] text-slate-400 font-medium">${new Date(item.createdAt).toLocaleDateString('sw-TZ')}</span>
                         </div>
-                    </div>
-
-                    <p class="text-xs text-slate-400 line-clamp-2 mb-4 h-8">${item.description || 'Hakuna maelezo...'}</p>
-
-                    <div class="flex flex-wrap gap-1.5 mb-6">
-                        ${item.tags.map(t => `<span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-white/5 text-slate-400 border border-white/5">#${t}</span>`).join('')}
-                    </div>
-
-                    <div class="flex items-center justify-between mt-auto pt-4 border-t border-white/5">
-                        <span class="text-[10px] text-slate-500 font-medium">${new Date(item.createdAt).toLocaleDateString('sw-TZ')}</span>
                         <div class="flex gap-3">
-                            ${item.fileData ? `<a href="${item.fileData}" download="${item.fileName}" class="flex items-center gap-1.5 text-xs font-bold text-emerald-500 hover:underline">Pakua <i data-lucide="download" class="w-3 h-3"></i></a>` : ''}
-                            ${item.url ? `<a href="${item.url}" target="_blank" class="flex items-center gap-1.5 text-xs font-bold text-[#00A3FF] hover:underline">Fungua <i data-lucide="external-link" class="w-3 h-3"></i></a>` : ''}
+                            ${item.fileData ? `<a href="${item.fileData}" download="${item.fileName}" class="flex items-center gap-2 text-xs font-bold text-emerald-500 hover:text-emerald-400 transition-colors">Pakua <i data-lucide="download" class="w-3.5 h-3.5"></i></a>` : ''}
+                            ${item.url ? `<a href="${item.url}" target="_blank" class="flex items-center gap-2 text-xs font-bold text-primary hover:text-primary/80 transition-colors">Fungua <i data-lucide="external-link" class="w-3.5 h-3.5"></i></a>` : ''}
                         </div>
                     </div>
                 </div>
             `;
         }
 
-        function renderListCard(item) {
+        function renderListCard(item, idx) {
              const iconMap = { Website: 'globe', Link: 'link', File: 'file-text', Project: 'hammer', Note: 'sticky-note' };
              return `
-                <div class="flex items-center gap-4 p-4 rounded-2xl border border-white/5 bg-card/40 hover:border-[#00A3FF]/30 transition-all group">
-                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5 text-slate-400">
-                        <i data-lucide="${iconMap[item.type]}" class="w-5 h-5"></i>
+                <div class="flex items-center gap-5 p-5 rounded-2xl glass glass-hover transition-all animate-fade-in group" style="animation-delay: ${idx * 0.05}s">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/5 text-slate-400 group-hover:text-primary transition-colors">
+                        <i data-lucide="${iconMap[item.type]}" class="w-6 h-6"></i>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <h3 class="font-bold text-white text-sm truncate">${item.name}</h3>
-                        <p class="text-[10px] text-slate-500 truncate">${item.description || 'Hakuna maelezo'}</p>
+                        <h3 class="font-bold text-white text-sm truncate group-hover:text-primary transition-colors">${item.name}</h3>
+                        <p class="text-[10px] text-slate-500 truncate mt-0.5">${item.description || 'Hakuna maelezo ya ziada'}</p>
                     </div>
-                    <div class="hidden md:flex flex-wrap gap-1 max-w-[200px]">
-                        ${item.tags.slice(0, 2).map(t => `<span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-white/5 text-slate-500">#${t}</span>`).join('')}
+                    <div class="hidden lg:flex flex-wrap gap-2 max-w-[250px]">
+                        ${item.tags.slice(0, 3).map(t => `<span class="text-[9px] font-bold px-2.5 py-1 rounded-lg bg-white/5 text-slate-500 border border-white/5">#${t}</span>`).join('')}
                     </div>
-                    <div class="flex items-center gap-2">
-                         ${item.fileData ? `<a href="${item.fileData}" download="${item.fileName}" class="p-2 text-emerald-500 hover:bg-emerald-500/10 rounded-lg transition-all"><i data-lucide="download" class="w-4 h-4"></i></a>` : ''}
-                         ${item.url ? `<a href="${item.url}" target="_blank" class="p-2 text-[#00A3FF] hover:bg-[#00A3FF]/10 rounded-lg transition-all"><i data-lucide="external-link" class="w-4 h-4"></i></a>` : ''}
-                         <button onclick="editItem('${item.id}')" class="p-2 text-slate-400 hover:bg-white/10 rounded-lg transition-all"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
-                         <button onclick="deleteItem('${item.id}')" class="p-2 text-slate-400 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-all"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    <div class="flex items-center gap-3">
+                         ${item.fileData ? `<a href="${item.fileData}" download="${item.fileName}" class="p-2.5 text-emerald-500 hover:bg-emerald-500/10 rounded-xl transition-all border border-transparent hover:border-emerald-500/20"><i data-lucide="download" class="w-4.5 h-4.5"></i></a>` : ''}
+                         ${item.url ? `<a href="${item.url}" target="_blank" class="p-2.5 text-primary hover:bg-primary/10 rounded-xl transition-all border border-transparent hover:border-primary/20"><i data-lucide="external-link" class="w-4.5 h-4.5"></i></a>` : ''}
+                         <button onclick="editItem('${item.id}')" class="p-2.5 text-slate-400 hover:bg-white/10 rounded-xl transition-all border border-transparent hover:border-white/10"><i data-lucide="edit-2" class="w-4.5 h-4.5"></i></button>
+                         <button onclick="deleteItem('${item.id}')" class="p-2.5 text-slate-400 hover:bg-red-500/10 hover:text-red-500 rounded-xl transition-all border border-transparent hover:border-red-500/20"><i data-lucide="trash-2" class="w-4.5 h-4.5"></i></button>
                     </div>
                 </div>
              `;
