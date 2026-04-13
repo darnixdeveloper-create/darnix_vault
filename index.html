@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="sw" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Darnix Group — Vault</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@300;400;500;600;700;800&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Epilogue', 'sans-serif'],
+                        syne: ['Syne', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#00A3FF',
+                        background: '#020817',
+                        card: '#020817',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #020817;
+            color: #f8fafc;
+            font-family: 'Epilogue', sans-serif;
+        }
+        .glow-accent {
+            box-shadow: 0 0 20px -5px #00A3FF;
+        }
+        .glow-hover:hover {
+            box-shadow: 0 0 30px -5px #00A3FF;
+        }
+        .glass {
+            background: rgba(2, 8, 23, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .modal-backdrop {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+        }
+    </style>
+</head>
+<body class="overflow-hidden">
+
+    <!-- Auth Screen -->
+    <div id="auth-screen" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#020817] p-4">
+        <div class="w-full max-w-md p-8 rounded-[2rem] border border-white/5 bg-card/40 backdrop-blur-xl glow-accent text-center space-y-8">
+            <div class="flex flex-col items-center gap-4">
+                <div class="flex h-20 w-20 items-center justify-center rounded-full bg-black border-2 border-[#00A3FF] glow-accent">
+                    <i data-lucide="database" class="h-10 w-10 text-[#00A3FF]"></i>
+                </div>
+                <h1 class="text-3xl font-black tracking-tighter text-white font-syne uppercase">DAR<span class="text-[#00A3FF]">NIX</span> VAULT</h1>
+                <p class="text-slate-400 text-sm">Hifadhi ya siri ya Darnix Group. Ingiza nenosiri kuendelea.</p>
+            </div>
+
+            <form id="login-form" class="space-y-4">
+                <input 
+                    type="password" 
+                    id="password-input"
+                    placeholder="Nenosiri" 
+                    class="w-full bg-white/5 border border-white/10 h-14 rounded-2xl text-center text-xl tracking-widest text-white focus:outline-none focus:border-[#00A3FF] transition-colors"
+                    autofocus
+                >
+                <button type="submit" class="w-full bg-[#00A3FF] hover:bg-[#00A3FF]/90 text-white font-bold h-14 rounded-2xl text-lg glow-hover transition-all">
+                    Ingia
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App UI (Hidden by default) -->
+    <div id="app-ui" class="hidden flex h-screen w-full overflow-hidden">
+        
+        <!-- Sidebar -->
+        <aside class="w-[280px] flex flex-col border-r border-white/5 bg-card/50 backdrop-blur-xl">
+            <div class="flex items-center gap-3 p-6">
+                <button id="profile-btn" class="flex h-12 w-12 items-center justify-center rounded-full bg-black border-2 border-[#00A3FF] glow-accent relative overflow-hidden group transition-transform hover:scale-105">
+                    <div id="profile-pic-container" class="h-full w-full flex items-center justify-center">
+                        <i data-lucide="database" class="h-6 w-6 text-[#00A3FF]"></i>
+                    </div>
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                        <i data-lucide="edit-3" class="w-4 h-4 text-white"></i>
+                    </div>
+                </button>
+                <div class="flex flex-col">
+                    <h1 class="text-xl font-black tracking-tighter text-white leading-none font-syne">DAR<span class="text-[#00A3FF]">NIX</span></h1>
+                    <span class="text-[10px] font-bold tracking-[0.3em] text-slate-500 uppercase mt-1">Group</span>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto px-4 py-4 space-y-1" id="nav-items">
+                <!-- Nav items injected by JS -->
+            </div>
+
+            <div class="p-6 space-y-3">
+                <button id="add-btn" class="w-full bg-[#00A3FF] hover:bg-[#00A3FF]/90 text-white font-bold rounded-xl h-12 glow-hover flex items-center justify-center gap-2 transition-all">
+                    <i data-lucide="plus" class="w-5 h-5"></i>
+                    Ongeza kipya
+                </button>
+                <button id="upload-btn-sidebar" class="w-full border border-[#00A3FF]/30 bg-[#00A3FF]/5 hover:bg-[#00A3FF]/10 text-[#00A3FF] font-bold rounded-xl h-12 flex items-center justify-center gap-2 transition-all">
+                    <i data-lucide="upload" class="w-5 h-5"></i>
+                    Pakia Faili
+                </button>
+                
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <button id="export-btn" class="flex items-center justify-center gap-2 border border-white/10 bg-white/5 hover:bg-white/10 text-xs h-10 rounded-lg text-slate-300">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        Export
+                    </button>
+                    <div class="relative">
+                        <button class="w-full flex items-center justify-center gap-2 border border-white/10 bg-white/5 hover:bg-white/10 text-xs h-10 rounded-lg text-slate-300">
+                            <i data-lucide="upload" class="w-4 h-4"></i>
+                            Import
+                        </button>
+                        <input type="file" id="import-input" accept=".json" class="absolute inset-0 opacity-0 cursor-pointer">
+                    </div>
+                </div>
+
+                <div class="space-y-2 pt-2">
+                    <div class="flex justify-between text-[10px] uppercase tracking-widest text-slate-500 font-bold">
+                        <span>Hifadhi</span>
+                        <span id="storage-text">0.0%</span>
+                    </div>
+                    <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                        <div id="storage-bar" class="h-full bg-[#00A3FF] glow-accent transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-hidden relative">
+            <!-- Topbar -->
+            <header class="flex h-20 items-center justify-between border-b border-white/5 bg-card/30 px-8 backdrop-blur-md">
+                <div class="flex items-center gap-4 flex-1 max-w-xl">
+                    <div class="relative w-full group">
+                        <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-[#00A3FF] transition-colors"></i>
+                        <input 
+                            type="text" 
+                            id="search-input"
+                            placeholder="Tafuta kwenye vault..." 
+                            class="w-full bg-white/5 border border-white/10 h-12 pl-12 pr-4 rounded-xl text-sm focus:outline-none focus:border-[#00A3FF] transition-all"
+                        >
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <div class="flex bg-white/5 p-1 rounded-xl border border-white/10">
+                        <button id="view-grid" class="p-2 rounded-lg bg-[#00A3FF] text-white transition-all">
+                            <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                        </button>
+                        <button id="view-list" class="p-2 rounded-lg text-slate-400 hover:text-white transition-all">
+                            <i data-lucide="list" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <select id="sort-select" class="bg-white/5 border border-white/10 h-11 px-4 rounded-xl text-xs font-bold focus:outline-none focus:border-[#00A3FF] appearance-none cursor-pointer">
+                        <option value="newest">Mpya zaidi</option>
+                        <option value="oldest">Zamani zaidi</option>
+                        <option value="name">Kwa Jina</option>
+                    </select>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="flex-1 overflow-y-auto p-8">
+                <div class="space-y-8">
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4" id="stats-container">
+                        <!-- Stats injected by JS -->
+                    </div>
+
+                    <!-- Items Grid -->
+                    <div id="items-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <!-- Items injected by JS -->
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="empty-state" class="hidden flex flex-col items-center justify-center py-20 text-center space-y-4">
+                        <div class="h-20 w-20 rounded-full bg-white/5 flex items-center justify-center">
+                            <i data-lucide="folder-open" class="w-10 h-10 text-slate-600"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-300">Hakuna kilichopatikana</h3>
+                        <p class="text-slate-500 max-w-xs">Jaribu kubadilisha utafutaji wako au ongeza kipengele kipya.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Item Modal -->
+    <div id="item-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
+        <div class="w-full max-w-2xl bg-[#0b1221] border border-white/10 rounded-[2.5rem] overflow-hidden glow-accent">
+            <div class="p-8 space-y-6">
+                <div class="flex items-center justify-between">
+                    <h2 id="modal-title" class="text-2xl font-black font-syne">Ongeza Kipya</h2>
+                    <button id="close-modal" class="p-2 hover:bg-white/5 rounded-full transition-colors">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Jina la Kipengele</label>
+                            <input id="form-name" type="text" class="w-full bg-white/5 border border-white/10 h-12 px-4 rounded-xl focus:outline-none focus:border-[#00A3FF]">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Aina</label>
+                            <select id="form-type" class="w-full bg-white/5 border border-white/10 h-12 px-4 rounded-xl focus:outline-none focus:border-[#00A3FF] appearance-none">
+                                <option value="Website">Website</option>
+                                <option value="Link">Link</option>
+                                <option value="File">File</option>
+                                <option value="Project">Project</option>
+                                <option value="Note">Note</option>
+                            </select>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">URL / Link</label>
+                            <input id="form-url" type="text" placeholder="https://..." class="w-full bg-white/5 border border-white/10 h-12 px-4 rounded-xl focus:outline-none focus:border-[#00A3FF]">
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div id="file-upload-section" class="hidden space-y-2">
+                            <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Pakia Faili (Upeo 2MB)</label>
+                            <div class="relative">
+                                <div class="w-full border-2 border-dashed border-white/10 bg-white/5 hover:bg-white/10 h-24 rounded-xl flex flex-col items-center justify-center gap-1 transition-all">
+                                    <i data-lucide="upload" class="w-5 h-5 text-[#00A3FF]"></i>
+                                    <span id="file-name-display" class="text-xs text-slate-400">Bonyeza hapa kupakia</span>
+                                </div>
+                                <input type="file" id="form-file-input" class="absolute inset-0 opacity-0 cursor-pointer">
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Tags (Tenganisha kwa koma)</label>
+                            <input id="form-tags" type="text" placeholder="react, design, api..." class="w-full bg-white/5 border border-white/10 h-12 px-4 rounded-xl focus:outline-none focus:border-[#00A3FF]">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Hali (Status)</label>
+                            <select id="form-status" class="w-full bg-white/5 border border-white/10 h-12 px-4 rounded-xl focus:outline-none focus:border-[#00A3FF] appearance-none">
+                                <option value="Active">Active</option>
+                                <option value="Archived">Archived</option>
+                                <option value="Draft">Draft</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Maelezo</label>
+                    <textarea id="form-description" rows="3" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl focus:outline-none focus:border-[#00A3FF] resize-none"></textarea>
+                </div>
+
+                <div class="flex gap-4 pt-4">
+                    <button id="cancel-modal" class="flex-1 h-14 rounded-2xl font-bold border border-white/10 hover:bg-white/5 transition-all">Ghairi</button>
+                    <button id="save-btn" class="flex-[2] h-14 rounded-2xl font-bold bg-[#00A3FF] hover:bg-[#00A3FF]/90 text-white glow-hover transition-all">Hifadhi Kipengele</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profile-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
+        <div class="w-full max-w-sm bg-[#0b1221] border border-white/10 rounded-[2.5rem] overflow-hidden glow-accent p-8 space-y-6">
+            <div class="text-center space-y-2">
+                <h2 class="text-2xl font-black font-syne">Picha ya Wasifu</h2>
+                <p class="text-slate-400 text-sm">Badilisha picha ya Darnix Group.</p>
+            </div>
+            
+            <div class="flex flex-col items-center gap-6">
+                <div class="h-32 w-32 rounded-full border-4 border-[#00A3FF] overflow-hidden bg-black flex items-center justify-center glow-accent">
+                    <div id="profile-preview" class="h-full w-full flex items-center justify-center">
+                        <i data-lucide="database" class="h-12 w-12 text-[#00A3FF]"></i>
+                    </div>
+                </div>
+                <div class="relative w-full">
+                    <button class="w-full bg-[#00A3FF] hover:bg-[#00A3FF]/90 font-bold h-12 rounded-xl flex items-center justify-center gap-2">
+                        <i data-lucide="upload" class="w-4 h-4"></i>
+                        Chagua Picha
+                    </button>
+                    <input type="file" id="profile-upload-input" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer">
+                </div>
+                <button id="close-profile-modal" class="text-slate-500 hover:text-white text-sm font-bold">Funga</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-6 right-6 z-[200] transform translate-x-[150%] transition-transform duration-300 pointer-events-none">
+        <div class="bg-zinc-900 border border-white/10 px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3">
+            <div id="toast-icon" class="h-8 w-8 rounded-full flex items-center justify-center"></div>
+            <p id="toast-msg" class="text-sm font-bold text-white"></p>
+        </div>
+    </div>
+
+    <script>
+        // --- State Management ---
+        let items = JSON.parse(localStorage.getItem('darnix-vault-items') || '[]');
+        let profilePic = localStorage.getItem('darnix-vault-profile') || null;
+        let isAuthenticated = sessionStorage.getItem('darnix-vault-auth') === 'true';
+        let selectedType = 'All';
+        let searchQuery = '';
+        let sortBy = 'newest';
+        let viewMode = 'grid';
+        let editingId = null;
+        let currentFileData = null;
+        let currentFileName = null;
+        let currentFileSize = null;
+
+        // --- Selectors ---
+        const authScreen = document.getElementById('auth-screen');
+        const appUi = document.getElementById('app-ui');
+        const loginForm = document.getElementById('login-form');
+        const passwordInput = document.getElementById('password-input');
+        const itemsContainer = document.getElementById('items-container');
+        const statsContainer = document.getElementById('stats-container');
+        const navItems = document.getElementById('nav-items');
+        const searchInput = document.getElementById('search-input');
+        const sortSelect = document.getElementById('sort-select');
+        const viewGridBtn = document.getElementById('view-grid');
+        const viewListBtn = document.getElementById('view-list');
+        const addBtn = document.getElementById('add-btn');
+        const uploadBtnSidebar = document.getElementById('upload-btn-sidebar');
+        const itemModal = document.getElementById('item-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const cancelModalBtn = document.getElementById('cancel-modal');
+        const saveBtn = document.getElementById('save-btn');
+        const formType = document.getElementById('form-type');
+        const fileUploadSection = document.getElementById('file-upload-section');
+        const formFileInput = document.getElementById('form-file-input');
+        const fileNameDisplay = document.getElementById('file-name-display');
+        const profileBtn = document.getElementById('profile-btn');
+        const profileModal = document.getElementById('profile-modal');
+        const profileUploadInput = document.getElementById('profile-upload-input');
+        const closeProfileModalBtn = document.getElementById('close-profile-modal');
+        const exportBtn = document.getElementById('export-btn');
+        const importInput = document.getElementById('import-input');
+        const emptyState = document.getElementById('empty-state');
+        const storageBar = document.getElementById('storage-bar');
+        const storageText = document.getElementById('storage-text');
+
+        // --- Initialization ---
+        function init() {
+            if (isAuthenticated) {
+                authScreen.classList.add('hidden');
+                appUi.classList.remove('hidden');
+                render();
+            }
+            updateProfileUI();
+            lucide.createIcons();
+        }
+
+        // --- Logic Functions ---
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            const toastIcon = document.getElementById('toast-icon');
+            
+            toastMsg.innerText = msg;
+            toastIcon.className = `h-8 w-8 rounded-full flex items-center justify-center ${type === 'success' ? 'bg-emerald-500/20 text-emerald-500' : 'bg-red-500/20 text-red-500'}`;
+            toastIcon.innerHTML = type === 'success' ? '<i data-lucide="check" class="w-4 h-4"></i>' : '<i data-lucide="alert-circle" class="w-4 h-4"></i>';
+            
+            lucide.createIcons();
+            toast.classList.remove('translate-x-[150%]');
+            setTimeout(() => toast.classList.add('translate-x-[150%]'), 3000);
+        }
+
+        function updateProfileUI() {
+            const containers = [document.getElementById('profile-pic-container'), document.getElementById('profile-preview')];
+            containers.forEach(container => {
+                if (profilePic) {
+                    container.innerHTML = `<img src="${profilePic}" class="h-full w-full object-cover">`;
+                } else {
+                    container.innerHTML = `<i data-lucide="database" class="h-6 w-6 text-[#00A3FF]"></i>`;
+                }
+            });
+            lucide.createIcons();
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('darnix-vault-items', JSON.stringify(items));
+            updateStorageStats();
+        }
+
+        function updateStorageStats() {
+            const percentage = Math.min(100, (items.length / 1000) * 100);
+            storageBar.style.width = `${percentage}%`;
+            storageText.innerText = `${percentage.toFixed(1)}%`;
+        }
+
+        function getFilteredItems() {
+            let result = [...items];
+            if (selectedType !== 'All') result = result.filter(i => i.type === selectedType);
+            if (searchQuery) {
+                const q = searchQuery.toLowerCase();
+                result = result.filter(i => 
+                    i.name.toLowerCase().includes(q) || 
+                    i.description.toLowerCase().includes(q) ||
+                    i.tags.some(t => t.toLowerCase().includes(q))
+                );
+            }
+            result.sort((a, b) => {
+                if (sortBy === 'newest') return new Date(b.createdAt) - new Date(a.createdAt);
+                if (sortBy === 'oldest') return new Date(a.createdAt) - new Date(b.createdAt);
+                if (sortBy === 'name') return a.name.localeCompare(b.name);
+                return 0;
+            });
+            return result;
+        }
+
+        function render() {
+            const filtered = getFilteredItems();
+            
+            // Render Stats
+            const stats = {
+                total: items.length,
+                websites: items.filter(i => i.type === 'Website').length,
+                links: items.filter(i => i.type === 'Link').length,
+                files: items.filter(i => i.type === 'File').length,
+                projects: items.filter(i => i.type === 'Project').length,
+                notes: items.filter(i => i.type === 'Note').length,
+            };
+
+            const statConfigs = [
+                { label: 'Zote', count: stats.total, color: '#00A3FF', type: 'All' },
+                { label: 'Websites', count: stats.websites, color: '#3B82F6', type: 'Website' },
+                { label: 'Links', count: stats.links, color: '#10B981', type: 'Link' },
+                { label: 'Files', count: stats.files, color: '#F59E0B', type: 'File' },
+                { label: 'Projects', count: stats.projects, color: '#8B5CF6', type: 'Project' },
+                { label: 'Notes', count: stats.notes, color: '#EC4899', type: 'Note' },
+            ];
+
+            statsContainer.innerHTML = statConfigs.map(s => `
+                <button onclick="setType('${s.type}')" class="flex flex-col p-4 rounded-2xl border ${selectedType === s.type ? 'border-white/20 bg-white/10' : 'border-white/5 bg-white/5'} hover:bg-white/10 transition-all text-left group">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500 group-hover:text-slate-300 transition-colors">${s.label}</span>
+                    <span class="text-2xl font-black mt-1" style="color: ${s.color}">${s.count}</span>
+                </button>
+            `).join('');
+
+            // Render Nav
+            const navConfigs = [
+                { label: 'Zote', icon: 'layout-grid', count: stats.total, type: 'All' },
+                { label: 'Websites', icon: 'globe', count: stats.websites, type: 'Website' },
+                { label: 'Links', icon: 'link', count: stats.links, type: 'Link' },
+                { label: 'Files', icon: 'file-text', count: stats.files, type: 'File' },
+                { label: 'Projects', icon: 'hammer', count: stats.projects, type: 'Project' },
+                { label: 'Notes', icon: 'sticky-note', count: stats.notes, type: 'Note' },
+            ];
+
+            navItems.innerHTML = navConfigs.map(n => `
+                <button onclick="setType('${n.type}')" class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all ${selectedType === n.type ? 'bg-[#00A3FF] text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white'}">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="${n.icon}" class="w-4 h-4"></i>
+                        <span class="text-sm font-bold">${n.label}</span>
+                    </div>
+                    <span class="text-[10px] font-black px-2 py-0.5 rounded-full ${selectedType === n.type ? 'bg-white/20' : 'bg-white/5'}">${n.count}</span>
+                </button>
+            `).join('');
+
+            // Render Items
+            if (filtered.length === 0) {
+                itemsContainer.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+            } else {
+                itemsContainer.classList.remove('hidden');
+                emptyState.classList.add('hidden');
+                
+                if (viewMode === 'grid') {
+                    itemsContainer.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6";
+                    itemsContainer.innerHTML = filtered.map(item => renderGridCard(item)).join('');
+                } else {
+                    itemsContainer.className = "flex flex-col gap-3";
+                    itemsContainer.innerHTML = filtered.map(item => renderListCard(item)).join('');
+                }
+            }
+
+            updateStorageStats();
+            lucide.createIcons();
+        }
+
+        function renderGridCard(item) {
+            const iconMap = { Website: 'globe', Link: 'link', File: 'file-text', Project: 'hammer', Note: 'sticky-note' };
+            const colorMap = { Website: '#3B82F6', Link: '#10B981', File: '#F59E0B', Project: '#8B5CF6', Note: '#EC4899' };
+            
+            return `
+                <div class="group relative flex flex-col p-6 rounded-3xl border border-white/5 bg-card/40 backdrop-blur-xl hover:border-[#00A3FF]/30 transition-all duration-300 hover:-translate-y-1">
+                    <div class="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onclick="editItem('${item.id}')" class="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all">
+                            <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
+                        </button>
+                        <button onclick="deleteItem('${item.id}')" class="p-2 rounded-lg bg-white/5 hover:bg-red-500/20 text-slate-400 hover:text-red-500 transition-all">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5" style="color: ${colorMap[item.type]}">
+                            <i data-lucide="${iconMap[item.type]}" class="w-5 h-5"></i>
+                        </div>
+                        <div class="flex flex-col">
+                            <h3 class="font-bold text-white leading-tight line-clamp-1">${item.name}</h3>
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500">${item.type}</span>
+                        </div>
+                    </div>
+
+                    <p class="text-xs text-slate-400 line-clamp-2 mb-4 h-8">${item.description || 'Hakuna maelezo...'}</p>
+
+                    <div class="flex flex-wrap gap-1.5 mb-6">
+                        ${item.tags.map(t => `<span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-white/5 text-slate-400 border border-white/5">#${t}</span>`).join('')}
+                    </div>
+
+                    <div class="flex items-center justify-between mt-auto pt-4 border-t border-white/5">
+                        <span class="text-[10px] text-slate-500 font-medium">${new Date(item.createdAt).toLocaleDateString('sw-TZ')}</span>
+                        <div class="flex gap-3">
+                            ${item.fileData ? `<a href="${item.fileData}" download="${item.fileName}" class="flex items-center gap-1.5 text-xs font-bold text-emerald-500 hover:underline">Pakua <i data-lucide="download" class="w-3 h-3"></i></a>` : ''}
+                            ${item.url ? `<a href="${item.url}" target="_blank" class="flex items-center gap-1.5 text-xs font-bold text-[#00A3FF] hover:underline">Fungua <i data-lucide="external-link" class="w-3 h-3"></i></a>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderListCard(item) {
+             const iconMap = { Website: 'globe', Link: 'link', File: 'file-text', Project: 'hammer', Note: 'sticky-note' };
+             return `
+                <div class="flex items-center gap-4 p-4 rounded-2xl border border-white/5 bg-card/40 hover:border-[#00A3FF]/30 transition-all group">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5 text-slate-400">
+                        <i data-lucide="${iconMap[item.type]}" class="w-5 h-5"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="font-bold text-white text-sm truncate">${item.name}</h3>
+                        <p class="text-[10px] text-slate-500 truncate">${item.description || 'Hakuna maelezo'}</p>
+                    </div>
+                    <div class="hidden md:flex flex-wrap gap-1 max-w-[200px]">
+                        ${item.tags.slice(0, 2).map(t => `<span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-white/5 text-slate-500">#${t}</span>`).join('')}
+                    </div>
+                    <div class="flex items-center gap-2">
+                         ${item.fileData ? `<a href="${item.fileData}" download="${item.fileName}" class="p-2 text-emerald-500 hover:bg-emerald-500/10 rounded-lg transition-all"><i data-lucide="download" class="w-4 h-4"></i></a>` : ''}
+                         ${item.url ? `<a href="${item.url}" target="_blank" class="p-2 text-[#00A3FF] hover:bg-[#00A3FF]/10 rounded-lg transition-all"><i data-lucide="external-link" class="w-4 h-4"></i></a>` : ''}
+                         <button onclick="editItem('${item.id}')" class="p-2 text-slate-400 hover:bg-white/10 rounded-lg transition-all"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                         <button onclick="deleteItem('${item.id}')" class="p-2 text-slate-400 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-all"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                </div>
+             `;
+        }
+
+        // --- Global Actions (exposed to window for onclick) ---
+        window.setType = (type) => { selectedType = type; render(); };
+        window.deleteItem = (id) => {
+            if (confirm('Je, una uhakika unataka kufuta kipengele hiki?')) {
+                items = items.filter(i => i.id !== id);
+                saveToStorage();
+                render();
+                showToast('Imefutwa kikamilifu');
+            }
+        };
+        window.editItem = (id) => {
+            const item = items.find(i => i.id === id);
+            if (!item) return;
+            
+            editingId = id;
+            document.getElementById('modal-title').innerText = 'Hariri Kipengele';
+            document.getElementById('form-name').value = item.name;
+            document.getElementById('form-type').value = item.type;
+            document.getElementById('form-url').value = item.url || '';
+            document.getElementById('form-description').value = item.description;
+            document.getElementById('form-tags').value = item.tags.join(', ');
+            document.getElementById('form-status').value = item.status;
+            
+            currentFileData = item.fileData;
+            currentFileName = item.fileName;
+            currentFileSize = item.fileSize;
+            
+            if (item.type === 'File') {
+                fileUploadSection.classList.remove('hidden');
+                fileNameDisplay.innerText = item.fileName || 'Bonyeza hapa kupakia';
+            } else {
+                fileUploadSection.classList.add('hidden');
+            }
+            
+            itemModal.classList.remove('hidden');
+        };
+
+        // --- Event Listeners ---
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (passwordInput.value === 'darnix123') {
+                isAuthenticated = true;
+                sessionStorage.setItem('darnix-vault-auth', 'true');
+                authScreen.classList.add('hidden');
+                appUi.classList.remove('hidden');
+                render();
+                showToast('Karibu Darnix!');
+            } else {
+                showToast('Nenosiri si sahihi', 'error');
+            }
+        });
+
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            render();
+        });
+
+        sortSelect.addEventListener('change', (e) => {
+            sortBy = e.target.value;
+            render();
+        });
+
+        viewGridBtn.addEventListener('click', () => {
+            viewMode = 'grid';
+            viewGridBtn.classList.add('bg-[#00A3FF]', 'text-white');
+            viewGridBtn.classList.remove('text-slate-400');
+            viewListBtn.classList.remove('bg-[#00A3FF]', 'text-white');
+            viewListBtn.classList.add('text-slate-400');
+            render();
+        });
+
+        viewListBtn.addEventListener('click', () => {
+            viewMode = 'list';
+            viewListBtn.classList.add('bg-[#00A3FF]', 'text-white');
+            viewListBtn.classList.remove('text-slate-400');
+            viewGridBtn.classList.remove('bg-[#00A3FF]', 'text-white');
+            viewGridBtn.classList.add('text-slate-400');
+            render();
+        });
+
+        addBtn.addEventListener('click', () => {
+            editingId = null;
+            document.getElementById('modal-title').innerText = 'Ongeza Kipya';
+            document.getElementById('form-name').value = '';
+            document.getElementById('form-type').value = 'Website';
+            document.getElementById('form-url').value = '';
+            document.getElementById('form-description').value = '';
+            document.getElementById('form-tags').value = '';
+            document.getElementById('form-status').value = 'Active';
+            fileUploadSection.classList.add('hidden');
+            currentFileData = null;
+            currentFileName = null;
+            currentFileSize = null;
+            itemModal.classList.remove('hidden');
+        });
+
+        uploadBtnSidebar.addEventListener('click', () => {
+            addBtn.click();
+            document.getElementById('form-type').value = 'File';
+            fileUploadSection.classList.remove('hidden');
+        });
+
+        closeModalBtn.addEventListener('click', () => itemModal.classList.add('hidden'));
+        cancelModalBtn.addEventListener('click', () => itemModal.classList.add('hidden'));
+
+        formType.addEventListener('change', (e) => {
+            if (e.target.value === 'File') fileUploadSection.classList.remove('hidden');
+            else fileUploadSection.classList.add('hidden');
+        });
+
+        formFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) {
+                showToast('Faili ni kubwa mno (Upeo 2MB)', 'error');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                currentFileData = event.target.result;
+                currentFileName = file.name;
+                currentFileSize = file.size;
+                fileNameDisplay.innerText = file.name;
+                if (!document.getElementById('form-name').value) {
+                    document.getElementById('form-name').value = file.name;
+                }
+                showToast('Faili imepakiwa');
+            };
+            reader.readAsDataURL(file);
+        });
+
+        saveBtn.addEventListener('click', () => {
+            const name = document.getElementById('form-name').value;
+            if (!name) { showToast('Jina linahitajika', 'error'); return; }
+
+            const type = document.getElementById('form-type').value;
+            const url = document.getElementById('form-url').value;
+            const description = document.getElementById('form-description').value;
+            const tags = document.getElementById('form-tags').value.split(',').map(t => t.trim()).filter(t => t);
+            const status = document.getElementById('form-status').value;
+
+            if (editingId) {
+                const index = items.findIndex(i => i.id === editingId);
+                items[index] = {
+                    ...items[index],
+                    name, type, url, description, tags, status,
+                    fileData: currentFileData,
+                    fileName: currentFileName,
+                    fileSize: currentFileSize,
+                    updatedAt: new Date().toISOString()
+                };
+                showToast('Imesasishwa kikamilifu');
+            } else {
+                const newItem = {
+                    id: Date.now().toString(),
+                    name, type, url, description, tags, status,
+                    fileData: currentFileData,
+                    fileName: currentFileName,
+                    fileSize: currentFileSize,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+                items.unshift(newItem);
+                showToast('Imeongezwa kikamilifu');
+            }
+
+            saveToStorage();
+            render();
+            itemModal.classList.add('hidden');
+        });
+
+        profileBtn.addEventListener('click', () => profileModal.classList.remove('hidden'));
+        closeProfileModalBtn.addEventListener('click', () => profileModal.classList.add('hidden'));
+
+        profileUploadInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                profilePic = event.target.result;
+                localStorage.setItem('darnix-vault-profile', profilePic);
+                updateProfileUI();
+                showToast('Picha ya wasifu imesasishwa');
+                profileModal.classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        });
+
+        exportBtn.addEventListener('click', () => {
+            const dataStr = JSON.stringify(items, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            const link = document.createElement('a');
+            link.setAttribute('href', dataUri);
+            link.setAttribute('download', `darnix-vault-export-${new Date().toISOString().split('T')[0]}.json`);
+            link.click();
+            showToast('Data imehamishwa');
+        });
+
+        importInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const imported = JSON.parse(event.target.result);
+                    items = [...imported, ...items];
+                    saveToStorage();
+                    render();
+                    showToast('Data imeingizwa');
+                } catch (err) {
+                    showToast('Faili si sahihi', 'error');
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        // Start the app
+        init();
+    </script>
+</body>
+</html>
